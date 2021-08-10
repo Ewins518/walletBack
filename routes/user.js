@@ -5,7 +5,7 @@ const transaction = require('../controllers/transaction')
 const compte = require('../controllers/compte')
 const recharge = require('../controllers/recharger')
 const router = express.Router()
-
+const fedapay = require('../controllers/fedapay')
 const momo = require('mtn-momo');
 
 const { Collections, Disbursements } = momo.create ({
@@ -25,7 +25,7 @@ router.route('/transaction/:id').patch(transaction.createTransac)
 
 router.route('/addcompte/:username').patch(compte.addMomo)
 
-router.get('/', (req, res) => res.send('Welcome'))
+router.get('/', (req, res) => res.render('index', {test: "120000"}))
 
 router.get("/balance", (_req, res, next) =>
   collections
@@ -41,5 +41,6 @@ router.route('/callback').all(
 })
 
 router.route('/recharge/:username').post(recharge.rechargerCompte)
+router.route('/fedapay').post(fedapay.fedaTrans)
 
 module.exports = router;

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pay</title>
+		<link href = "/assets/bootstrap/css/bootstrap.min.css" rel = "stylesheet">
+		<link href = "/assets/bootstrap/css/payement.css" rel = "stylesheet">
+	</head>
+	<body>
+		
+		<div class="limiter" id="login">
+    <div class="container-login100" style="background-image:url(/assets/image/happy-woman.jpg)">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-5 col-md-offset-1">
+					
+                    <div class="wrap-login100">
+						<div class="login100-form-title p-b-55 m-b-16"> 
+							<span class="head100-form-btn"> TOTAL A PAYER: </span>
+							<span class="head100-form-btn"> <%=test%> EURO</span>
+						 </div>
+                        <form class="login100-form validate-form"> 
+							
+							 <span> Nom et prénoms </span>
+                            <div class="wrap-input100 validate-input m-b-16" > <input class="input100" type="text" name="name" placeholder="full name" required> <span class="focus-input100"></span> <span class="symbol-input100"> <span class="glyphicon glyphicon-user"></span> </span> </div>
+							<span> Compte mobile money </span>
+							<div class="wrap-input100 validate-input m-b-16" > <input class="input100" type="text" name="number" placeholder="Number" required> <span class="focus-input100"></span> <span class="symbol-input100"> <span class="glyphicon glyphicon-lock"></span> </span> </div>
+                           
+                            <div class="container-login100-form-btn p-t-55 m-b-16"> <button class="login100-form-btn"> Payer </button> </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+	</body>
+</html>
