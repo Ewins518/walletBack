@@ -1,8 +1,27 @@
 const express = require('express')
 const db = require('./models');
-
 const app = express()
+const momo = require('mtn-momo');
+require("dotenv").config();
+
 const port = 3300
+
+const { Collections, Disbursements } = momo.create({
+    callbackHost: "http://aee51d212026.ngrok.io"
+  });
+  
+  const collections = Collections({
+    userSecret: process.env.COLLECTIONS_USER_SECRET,
+    userId: process.env.COLLECTIONS_USER_ID,
+    primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
+  });
+  
+  const disbursements = Disbursements({
+    userSecret: process.env.DISBURSEMENTS_USER_SECRET,
+    userId: process.env.DISBURSEMENTS_USER_ID,
+    primaryKey: process.env.DISBURSEMENTS_PRIMARY_KEY
+  });
+
 
 app.set('view engine', 'ejs')
 
@@ -12,9 +31,8 @@ app.set('view engine', 'ejs')
 
 app.use('/assets',express.static('public'))
 
-app.use(express.json())
-const userRoute = require("./routes/user")
-app.use('/user', userRoute)
 
+const userRoute = require("./routes/user") 
+app.use('/user', userRoute)
 
 app.listen(port, () =>console.log(`Server runing on port ${port}` ) ) 

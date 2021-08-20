@@ -2,17 +2,19 @@ const db = require("../models");
 const Compte = db.Compte
 const Momo = db.CompteMomo
 const momo = require('mtn-momo');
+require("dotenv").config();
+const poll = require('./poll')
 
 exports.rechargerCompte = async (req, res, next) => {
 
 const { Collections, Disbursements } = momo.create ({
-    callbackHost: " http://0049550c592c.ngrok.io "
+    callbackHost: " http://aee51d212026.ngrok.io "
 })
 
 const collections = Collections ({
-    userSecret: "d927779c78914946996d4489331d9f59",
-    userId: "9d0b0cb6-ddec-43d3-b742-9b12e92e1031",
-    primaryKey: "2af99205bba84d34be7bcfc8e4e1f736"
+    userSecret: process.env.COLLECTIONS_USER_SECRET,
+    userId: process.env.COLLECTIONS_USER_ID,
+    primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
 })
 
 
@@ -35,12 +37,12 @@ const disbursements = Disbursements ({
     };
 
     try {
-        const verifNum = await Momo.findOne({
-            where: { noTel: req.body.phone }
+        const getCompte = await Compte.findOne({
+            where: { userID: req.params.id }
         });
 
-        if(verifNum){
-            console.log("inside verifNum");
+        if(getCompte){
+            console.log("inside collections");
             collections
                 .requestToPay({
                   amount: recharge["montant"],
@@ -48,32 +50,30 @@ const disbursements = Disbursements ({
                   externalId: "123456",
                   payer: {
                     partyIdType: momo.PayerType.MSISDN,
-                    partyId: "+22962765653"
+                    partyId: recharge['phone']
                   },
                   payerMessage: "testing",
                   payeeNote: "hello"
                 })
-                .then(async transactionId => {
-                console.log(collections.getTransaction(transactionId))
-                
-                if(res.status === 200) {
-    
-                        const numCompte = verifNum.get('CompteID')
-                        const getCompte = await Compte.findOne({ where: { CompteID: numCompte } });
-    
-                        if (searchCompte) {
+                .then(async transactionId => poll.poll(() => collections.getTransaction(transactionId)))
+                .then(async () => {
+
+                console.log(res.statusCode)
+                if(res.statusCode === 200 || res.statusCode === 200) {
     
                         const oldSolde = getCompte.get('solde');
     
-                         await Compte.update({ solde: oldSolde + req.body.montant },
-                            { where: { noCompte: numCompte } }).then(data => {
+                         await Compte.update({ solde: oldSolde + parseInt(req.body.montant) },
+                            { where: { noCompte: getCompte.get('noCompte')} }).then(data => {
                            
-                                res.send(data)
+                                res.status(200).json("Compte rechargé")
+                                //res.send(data)
                                 console.log("Compte rechargé");
-                               // res.status(200).json("ok");
+                                
+                               
                             });
+                            
                         }
-                    }
                 
                 })
             .catch(error => {
@@ -102,14 +102,4 @@ const disbursements = Disbursements ({
         return "Something went wrong";
       }
 
-      function poll(fn) {
-        return new Promise((resolve, reject) => {
-          const interval = setInterval(() => {
-            return fn()
-              .then(resolve)
-              .catch(reject)
-              .finally(() => clearInterval(interval));
-          }, 5000);
-        });
-      }
 }

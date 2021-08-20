@@ -4,7 +4,6 @@ const Compte = db.Compte
 const User = db.User
 
 exports.addMomo = async (req, res) => {
-    console.log('Inside adding momo');
 
     // Validate request
     if (!req.body.tel) {
@@ -16,16 +15,15 @@ exports.addMomo = async (req, res) => {
 
     // Create a momoCompte
     const momo = {
-        CompteID: null,
+        compteID: null,
         noTel: req.body.tel      
     };
 
         
     // Save compteMomo in the database and actif compte
     try{
-            console.log('inside adding...........');
            
-                const searchUser = await User.findOne({ where: { name: req.params.username} });
+                const searchUser = await User.findOne({ where: { id: req.params.id} });
                 
                 if (searchUser) {
                     const user_id = searchUser.get('id')
@@ -36,20 +34,16 @@ exports.addMomo = async (req, res) => {
                 
                     const numCompte = searchCompte.get('noCompte');
 
-                    console.log('inside activing.......');
-
-                        momo['CompteID'] = numCompte
+                        momo['compteID'] = numCompte
                    
                         await Momo.create(momo).then(data1 => {
                        
                         res.send(data1)
                         console.log("compte momo ajouter au compte ",searchCompte.get('noCompte'));
-                       // res.status(200).json("ok");
+                        res.status(200).json("ok");
                        
                     })
-                    await Compte.update({ actif: true }, { where: { noCompte: numCompte } });
-
-  
+                  //  await Compte.update({ actif: true }, { where: { noCompte: numCompte } });
 
                  }
                  

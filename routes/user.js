@@ -1,5 +1,5 @@
 const express = require('express')
-
+const link = require('../controllers/lien')
 const user = require('../controllers/users')
 const transaction = require('../controllers/transaction')
 const compte = require('../controllers/compte')
@@ -7,27 +7,116 @@ const recharge = require('../controllers/recharger')
 const router = express.Router()
 const fedapay = require('../controllers/fedapay')
 const momo = require('mtn-momo');
+const db = require("../models");
+const Client = db.Client
+const Compte = db.Compte
+const Momo = db.CompteMomo
+const Lien = db.Lien
+const bodyParser = require('body-parser')
+var idLink, linkAmount, accountNumber;
+require("dotenv").config();
+const poll = require('../controllers/poll')
+const CompteMomo = require('../models/CompteMomo')
 
-const { Collections, Disbursements } = momo.create ({
-    callbackHost: " http://0049550c592c.ngrok.io "
-})
+const { Collections, Disbursements } = momo.create({
+  callbackHost: "http://aee51d212026.ngrok.io"
+});
 
-const collections = Collections ({
-    userSecret: "d927779c78914946996d4489331d9f59",
-    userId: "9d0b0cb6-ddec-43d3-b742-9b12e92e1031",
-    primaryKey: "2af99205bba84d34be7bcfc8e4e1f736"
-})
+const collections = Collections({
+  userSecret: process.env.COLLECTIONS_USER_SECRET,
+  userId: process.env.COLLECTIONS_USER_ID,
+  primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
+});
+
+const disbursements = Disbursements({
+  userSecret: process.env.DISBURSEMENTS_USER_SECRET,
+  userId: process.env.DISBURSEMENTS_USER_ID,
+  primaryKey: process.env.DISBURSEMENTS_PRIMARY_KEY
+});
+
+
+
+router.use(bodyParser.urlencoded({ extended: false }))
+
+router.use(bodyParser.json())
 
 
 router.route('/register').post(user.createUser)
 
 router.route('/transaction/:id').patch(transaction.createTransac)
 
-router.route('/addcompte/:username').patch(compte.addMomo)
+router.route('/paylink/:id').post(link.createLink)
 
-router.get('/', (req, res) => res.render('index', {test: "120000"}))
+router.route('/addcompte/:id').post(compte.addMomo)
 
-router.get("/balance", (_req, res, next) =>
+router.get('/:id', async (req, res) => {
+ const foundLink = await Lien.findOne({where: {identifiant: req.params.id}})
+ 
+ idLink = foundLink.get('id')
+ linkAmount = foundLink.get('montant')
+ accountNumber = foundLink.get('compteID')
+
+  res.render('index', {test: linkAmount})
+  
+})
+
+router.post('/pay', async (req, res) => {
+  
+      const client = {
+        name: req.body.nom,
+        number: req.body.number,
+        lienID: idLink
+      }
+      console.log("inside pay")
+      collections
+        .requestToPay({
+          amount: linkAmount,
+          currency: "EUR",
+          externalId: "123456",
+          payer: {
+            partyIdType: momo.PayerType.MSISDN,
+            partyId: client["number"]
+          },
+          payerMessage: "testing",
+          payeeNote: "hello"
+        })
+        .then(async transactionId => poll.poll(() => collections.getTransaction(transactionId)))
+        .then(async () => {
+          console.log("inside pay 2")
+          
+          await Client.create(client)
+          .then(async data => {
+    
+            const foundCompte = await Compte.findOne({
+              where: { noCompte: accountNumber , actif: true}
+          });
+
+        const oldSolde = foundCompte.get('solde');
+
+        await Compte.update({solde: oldSolde + linkAmount}, {where: {noCompte: accountNumber}})
+
+        res.status(200).json({msg: "Paiement effectué"})
+      })
+      .catch(error => {
+        if (error instanceof momo.MtnMoMoError) {
+          res.send(getFriendlyErrorMessage(error));
+        }
+        next(error);
+    })
+  })
+
+  function getFriendlyErrorMessage(error) {
+    if (error instanceof MoMo.NotEnoughFundsError) {
+      return "You have insufficient balance";
+    }
+  
+    // Other error messages go here
+  
+    return "Something went wrong";
+  }
+
+})
+router.get("/get/balance", (req, res, next) =>
   collections
     .getBalance()
     .then(account => res.json(account))
@@ -40,7 +129,58 @@ router.route('/callback').all(
         res.send("ok");
 })
 
-router.route('/recharge/:username').post(recharge.rechargerCompte)
+router.route('/recharge/:id').post(recharge.rechargerCompte)
+
 router.route('/fedapay').post(fedapay.fedaTrans)
 
-module.exports = router;
+router.post('/renverser/:id', async (req, res) => {
+  
+  const getAccount = await Compte.findOne({where: {userID: req.params.id}})
+  const getMomoAccount = await Momo.findOne({where: {noTel: req.body.tel, compteID: getAccount.get('noCompte')}})
+
+ if(getMomoAccount){
+
+  const renverse = {
+    noTel: req.body.tel,
+    montant: req.body.montant
+  }
+
+  if(req.body.montant <= getAccount.get('solde')){
+
+  disbursements.transfer({
+    amount: renverse['montant'],
+    currency: "EUR",
+    externalId: "12578",
+    payee: {
+      partyIdType: "MSISDN",
+      partyId: renverse["noTel"]
+    },
+    payerMessage: "testing",
+    payeeNote: "hello"
+  })
+  .then(disbursementId => poll.poll(() => disbursements.getTransaction(disbursementId)))
+    .then(async () => {
+      
+    
+    await Momo.update({montantRenverser: getMomoAccount.get('montantRenverser') + parseInt(renverse['montant'])}, {where: {id: getMomoAccount.get('id')}})
+
+    const oldSolde = getAccount.get('solde');
+
+    await Compte.update({solde: oldSolde - parseInt(renverse['montant'])}, {where: {noCompte: getAccount.get('noCompte')}})
+
+    res.status(200).json({msg: "Renversement effectué"})
+  })
+  .catch(error => {
+    res.send(error)
+})
+
+  } else {
+    res.status(400).json({msg: "Solde insuffisant"})
+  }
+
+ }  else {
+  res.status(404).json({msg: "Ce compte momo n'est pas relié à votre portefeuille"})
+}
+
+})
+module.exports = router

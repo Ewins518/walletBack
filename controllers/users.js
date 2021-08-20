@@ -3,7 +3,6 @@ const User = db.User
 const Compte = db.Compte
 
 const createUser = (req, res) => {
-    console.log('Inside registration');
 
     // Validate request
     if (!req.body.username || !req.body.email || !req.body.password) {

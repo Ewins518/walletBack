@@ -22,7 +22,7 @@ const Compte = sequelize.define('compte', {
     },
     actif:{
         type: Sequelize.BOOLEAN,
-        defaultValue: false
+        defaultValue: true
     },
   },
   );

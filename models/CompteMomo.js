@@ -15,6 +15,10 @@ const CompteMomo = sequelize.define('momo', {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
+    },
+    montantRenverser:{
+        type: Sequelize.INTEGER,
+        defaultValue: 0
     }
   },
   );
