@@ -50,7 +50,9 @@ router.route('/login').post(user.signIn)
 
 router.route('/transaction').post(middleware.checkToken,transaction.createTransac)
 
-router.route('/gettransaction').get(middleware.checkToken,transaction.allTransaction)
+router.route('/getsendtransaction').get(middleware.checkToken,transaction.allSendTransaction)
+
+router.route('/getreceivetransaction').get(middleware.checkToken,transaction.allReceiveTransaction)
 
 router.route('/getrenversement').get(middleware.checkToken,transaction.allRenversement)
 

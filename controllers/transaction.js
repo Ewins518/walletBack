@@ -68,7 +68,7 @@ exports.createTransac = async (req, res) => {
             
 };
 
-exports.allTransaction = async (req, res) => {
+exports.allSendTransaction = async (req, res) => {
     var tab = {};
     var allData = []
     let i = 0;
@@ -99,6 +99,46 @@ exports.allTransaction = async (req, res) => {
              
         })
 
+    })
+    
+}
+
+
+exports.allReceiveTransaction = async (req, res) => {
+    var tab = {};
+    var allData = []
+    let i = 0;
+    await Compte.findOne({where :{userID: req.decoded.userId}})
+    .then(async data => {
+
+    await Transaction.findAll({
+        attributes: ["compte_id", "montant", "createdAt", "userID"],
+        where: { compte_id: data.noCompte , isRecharge: false}
+    }).then(async result => {
+
+        if(result.length == 0)
+            return res.status(403).send({allData})
+
+        result.forEach ( async comp => {
+       
+            await User.findOne({where: {id: comp.userID}})
+            .then(user => {
+                tab["username"] = user.name,
+                tab["montant"] = comp.montant,
+                tab["date"] = comp.createdAt.toISOString().replace(/T/,' ').replace(/\..+/,''),
+                tab["nature"] = "Reçu"
+                  
+               i++
+               allData.push(tab)
+               tab = {}
+                if(i == result.length)
+                    res.status(200).send({allData})
+            })
+            
+           })
+             
+        })
+    
     })
     
 }
