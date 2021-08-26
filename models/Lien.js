@@ -23,6 +23,10 @@ const Lien = sequelize.define('lien', {
     url:{
         type: Sequelize.STRING,
         allowNull: false,
+    },
+    callbackUrl:{
+        type: Sequelize.STRING,
+        allowNull: true,
     }
 
   });

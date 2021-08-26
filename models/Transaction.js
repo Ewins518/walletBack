@@ -10,15 +10,16 @@ const Transaction = sequelize.define('transaction', {
         primaryKey: true,  
         autoIncrement: true
     },
-    //date:{
-      //  type: Sequelize.DATE,
-    //},
+    isRecharge:{
+       type: Sequelize.BOOLEAN,
+       defaultValue: false
+    },
     montant:{
         type: Sequelize.INTEGER,
         allowNull: false
     },
     compte_id:{
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull: false,
     }
 

@@ -1,9 +1,3 @@
-var Sequelize = require('sequelize');
-const { Transac } = require('../models');
-const db = require('../models');
-const User = db.User
-const Transaction = db.Transac;
-const CompteMomo = db.CompteMomo
 
 module.exports = (sequelize, Sequelize) =>{
 
@@ -23,6 +17,11 @@ const Compte = sequelize.define('compte', {
     actif:{
         type: Sequelize.BOOLEAN,
         defaultValue: true
+    },
+    apiKey:{
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        unique:true,
     },
   },
   );

@@ -16,9 +16,13 @@ const CompteMomo = sequelize.define('momo', {
         allowNull: false,
         unique: true,
     },
-    montantRenverser:{
+    montantTotalRenverser:{
         type: Sequelize.INTEGER,
         defaultValue: 0
+    },
+    montantRenverser:{
+        type: Sequelize.ARRAY(Sequelize.JSON),
+        allowNull: true,
     }
   },
   );

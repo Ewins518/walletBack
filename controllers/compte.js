@@ -23,7 +23,7 @@ exports.addMomo = async (req, res) => {
     // Save compteMomo in the database and actif compte
     try{
            
-                const searchUser = await User.findOne({ where: { id: req.params.id} });
+                const searchUser = await User.findOne({ where: { id: req.decoded.userId} });
                 
                 if (searchUser) {
                     const user_id = searchUser.get('id')
@@ -36,11 +36,9 @@ exports.addMomo = async (req, res) => {
 
                         momo['compteID'] = numCompte
                    
-                        await Momo.create(momo).then(data1 => {
+                        await Momo.create(momo).then(data => {
                        
-                        res.send(data1)
-                        console.log("compte momo ajouter au compte ",searchCompte.get('noCompte'));
-                        res.status(200).json("ok");
+                        res.status(200).json({msg: "Le numero " + data.noTel +" est lié desormais a votre compte ",});
                        
                     })
                   //  await Compte.update({ actif: true }, { where: { noCompte: numCompte } });
@@ -53,4 +51,35 @@ exports.addMomo = async (req, res) => {
                 res.status(500).send(e);
             }  
             
-};
+}
+
+
+exports.allmomoAccount = async (req, res) => {
+    var tab = {};
+    var allData = []
+    let i = 0;
+    await Compte.findOne({where: {userID: req.decoded.userId }})
+    .then(async data => {
+
+        await Momo.findAll({
+            attributes: ["noTel", "montantRenverser"],
+            where: { compteID: data.noCompte }
+        }).then(async result => {
+    
+            result.forEach ( async comp => {
+           
+                    tab["phone"] = comp.noTel,
+                    tab["montant"] = comp.montantRenverser,
+                      
+                   i++
+                   allData.push(tab)
+                   tab = {}
+                    if(i == result.length)
+                        res.status(200).send({allData})
+                })
+                
+        })
+    })
+
+    
+}

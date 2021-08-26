@@ -1,6 +1,6 @@
 const db = require("../models");
 const Compte = db.Compte
-const Momo = db.CompteMomo
+const Transaction = db.Transac
 const momo = require('mtn-momo');
 require("dotenv").config();
 const poll = require('./poll')
@@ -38,7 +38,7 @@ const disbursements = Disbursements ({
 
     try {
         const getCompte = await Compte.findOne({
-            where: { userID: req.params.id }
+            where: { userID: req.decoded.userId }
         });
 
         if(getCompte){
@@ -59,16 +59,27 @@ const disbursements = Disbursements ({
                 .then(async () => {
 
                 console.log(res.statusCode)
-                if(res.statusCode === 200 || res.statusCode === 200) {
+                if(res.statusCode === 201 || res.statusCode === 200) {
     
                         const oldSolde = getCompte.get('solde');
-    
+                        const userAccount = getCompte.get('noCompte')
+
                          await Compte.update({ solde: oldSolde + parseInt(req.body.montant) },
-                            { where: { noCompte: getCompte.get('noCompte')} }).then(data => {
-                           
-                                res.status(200).json("Compte rechargé")
-                                //res.send(data)
-                                console.log("Compte rechargé");
+                            { where: { noCompte: userAccount} })
+                            .then(async () => {
+                                
+                                const virement = {
+                                    userID: req.decoded.userId,
+                                    montant: req.body.montant,
+                                    compte_id: parseInt(req.body.phone),
+                                    isRecharge: true      
+                                };
+                                 
+                                await Transaction.create(virement)
+                                .then(() => {
+                                    res.status(200).json({ message: 'Compte rechargé avec succès' })
+                                })
+                                .catch(error => res.status(500).json({ error }))
                                 
                                
                             });
@@ -77,6 +88,7 @@ const disbursements = Disbursements ({
                 
                 })
             .catch(error => {
+
                 if (error instanceof momo.MtnMoMoError) {
                   res.send(getFriendlyErrorMessage(error));
                 }
@@ -85,7 +97,7 @@ const disbursements = Disbursements ({
      }
 
      else 
-        res.status(404).send("Number not registered");
+        res.status(404).send("Account not found");
     }
     
     catch(e) {
@@ -102,4 +114,31 @@ const disbursements = Disbursements ({
         return "Something went wrong";
       }
 
+}
+
+
+exports.allrecharge = async (req, res) => {
+    var tab = {};
+    var allData = []
+    let i = 0;
+    await Transaction.findAll({
+        attributes: ["compte_id", "montant", "createdAt"],
+        where: { userID: req.decoded.userId , isRecharge: true}
+    }).then(async result => {
+
+        result.forEach ( async comp => {
+       
+                tab["numero"] = comp.compte_id,
+                tab["montant"] = comp.montant,
+                tab["date"] = comp.createdAt.toISOString().replace(/T/,' ').replace(/\..+/,''),
+                  
+               i++
+               allData.push(tab)
+               tab = {}
+                if(i == result.length)
+                    res.status(200).send({allData})
+            })
+            
+    })
+    
 }

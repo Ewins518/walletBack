@@ -1,3 +1,3 @@
 module.exports = {
-    key: "MyWallet"
+    key: "RANDOM_TOKEN_SECRET"
 }
