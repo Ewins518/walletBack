@@ -39,4 +39,7 @@ app.use('/user', userRoute)
 app.use('/link', linkRoute)
 app.use('/compte', compteRoute)
 
+app.route("/").get((req, res)=> res.json("Bienvenue sur Ultrapay")) 
+
 app.listen(port, () =>console.log(`Server runing on port ${port}` ) ) 
+
