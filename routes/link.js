@@ -13,7 +13,7 @@ const poll = require('../controllers/poll')
 const middleware = require('../config/middleware')
 
 const { Collections, Disbursements } = momo.create({
-  callbackHost: "/"
+  callbackHost: "https://ultraypay.herokuapp.com/"
 });
 
 const collections = Collections({

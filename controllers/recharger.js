@@ -8,7 +8,7 @@ const poll = require('./poll')
 exports.rechargerCompte = async (req, res, next) => {
 
 const { Collections, Disbursements } = momo.create ({
-    callbackHost: ""
+    callbackHost: "https://ultraypay.herokuapp.com/"
 })
 
 const collections = Collections ({
