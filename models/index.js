@@ -3,9 +3,12 @@ const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     host: dbConfig.HOST,
+    ssl: true,
     dialect: dbConfig.dialect,
     operatorsAliases: 0,
- 
+    dialectOptions: {
+      "ssl": true
+    },
     pool: {
       max: dbConfig.pool.max,
       min: dbConfig.pool.min,
