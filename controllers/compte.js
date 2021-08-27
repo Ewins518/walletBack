@@ -65,7 +65,10 @@ exports.allmomoAccount = async (req, res) => {
             attributes: ["noTel", "montantRenverser"],
             where: { compteID: data.noCompte }
         }).then(async result => {
-    
+            
+            if(result.length == 0)
+                return res.send(403).json({allData})
+                
             result.forEach ( async comp => {
            
                     tab["phone"] = comp.noTel,

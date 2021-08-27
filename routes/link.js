@@ -35,7 +35,7 @@ router.use(bodyParser.urlencoded({ extended: false }))
 router.use(bodyParser.json())
 
 
-router.route('/getlinkusers').get(middleware.checkToken,link.allLinkUser)
+router.route('/get/linkusers').get(middleware.checkToken,link.allLinkUser)
 
 router.route('/paymentlink').post(middleware.checkToken,link.createLink)
 

@@ -144,9 +144,7 @@ exports.allReceiveTransaction = async (req, res) => {
 }
 
 exports.allRenversement = async (req, res) => {
-    var tab = {};
-    var allData = []
-    let i = 0;
+    
     await Compte.findOne({
         where: { userID: req.decoded.userId }
     }).then(async result  => {

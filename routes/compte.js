@@ -41,11 +41,15 @@ router.route('/transaction').post(middleware.checkToken,transaction.createTransa
 
 router.route('/getsendtransaction').get(middleware.checkToken,transaction.allSendTransaction)
 
+router.route('/getrecharge').get(middleware.checkToken,recharge.allrecharge)
+
 router.route('/getreceivetransaction').get(middleware.checkToken,transaction.allReceiveTransaction)
 
 router.route('/getrenversement').get(middleware.checkToken,transaction.allRenversement)
 
 router.route('/addcompte').post(middleware.checkToken,compte.addMomo)
+
+router.route('/getallmomo').get(middleware.checkToken,compte.allmomoAccount)
 
 router.route('/recharge').post(middleware.checkToken,recharge.rechargerCompte)
 
@@ -86,8 +90,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     })
     .then(disbursementId => poll.poll(() => disbursements.getTransaction(disbursementId)))
       .then(async () => {
-        console.log(allData)
-        console.log(tab) 
+       
        allData.push(tab)
      
       await Momo.update({

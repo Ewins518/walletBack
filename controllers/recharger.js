@@ -126,6 +126,9 @@ exports.allrecharge = async (req, res) => {
         where: { userID: req.decoded.userId , isRecharge: true}
     }).then(async result => {
 
+        if(result.length == 0)
+            return res.status(403).json({allData})
+            
         result.forEach ( async comp => {
        
                 tab["numero"] = comp.compte_id,
