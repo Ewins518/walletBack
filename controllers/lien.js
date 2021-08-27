@@ -20,7 +20,7 @@ exports.createLink = async (req, res) => {
         Description: req.body.desc,
         callbackUrl: req.body.callback,
         compteID: null,
-        url: "https://ultrapay49.loca.lt/user/link/",
+        url: "https://ultrapay.herokuapp.com/link/",
     }
 
     try{
@@ -70,7 +70,7 @@ exports.createWebSitLink = async (req, res) => {
        Description: req.body.desc,
        callbackUrl: req.body.callback,
        compteID: null,
-       url: "https://ultrapay49.loca.lt/user/link/",
+       url: "https://ultrapay.herokuapp.com/link/",
    }
 
    try{

@@ -8,7 +8,7 @@ const poll = require('./poll')
 exports.rechargerCompte = async (req, res, next) => {
 
 const { Collections, Disbursements } = momo.create ({
-    callbackHost: " http://aee51d212026.ngrok.io "
+    callbackHost: ""
 })
 
 const collections = Collections ({

@@ -13,7 +13,7 @@ const poll = require('../controllers/poll')
 const middleware = require('../config/middleware')
 
 const { Collections, Disbursements } = momo.create({
-  callbackHost: "http://aee51d212026.ngrok.io"
+  callbackHost: "/"
 });
 
 const collections = Collections({

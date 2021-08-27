@@ -7,7 +7,7 @@ require("dotenv").config();
 const port = process.env.PORT || 5000
 
 const { Collections, Disbursements } = momo.create({
-    callbackHost: "http://aee51d212026.ngrok.io"
+    callbackHost: ""
   });
   
   const collections = Collections({
