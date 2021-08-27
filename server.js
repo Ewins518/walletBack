@@ -25,14 +25,18 @@ const { Collections, Disbursements } = momo.create({
 
 app.set('view engine', 'ejs')
 
-//db.sequelize.sync().then(() => {
-//    console.log("The database is ready!");
-//});
+db.sequelize.sync().then(() => {
+    console.log("The database is ready!");
+});
 
 app.use('/assets',express.static('public'))
 
-
 const userRoute = require("./routes/user") 
+const linkRoute = require("./routes/link")
+const compteRoute = require("./routes/compte")
+
 app.use('/user', userRoute)
+app.use('/link', linkRoute)
+app.use('/compte', compteRoute)
 
 app.listen(port, () =>console.log(`Server runing on port ${port}` ) ) 
