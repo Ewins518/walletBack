@@ -7,7 +7,7 @@ require("dotenv").config();
 const port = process.env.PORT || 5000
 
 const { Collections, Disbursements } = momo.create({
-    callbackHost: ""
+    callbackHost: "https://ultraypay.herokuapp.com/"
   });
   
   const collections = Collections({
