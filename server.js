@@ -4,7 +4,7 @@ const app = express()
 const momo = require('mtn-momo');
 require("dotenv").config();
 
-const port = 3300
+const port = process.env.PORT || 5000
 
 const { Collections, Disbursements } = momo.create({
     callbackHost: "http://aee51d212026.ngrok.io"
@@ -25,9 +25,9 @@ const { Collections, Disbursements } = momo.create({
 
 app.set('view engine', 'ejs')
 
-db.sequelize.sync().then(() => {
-    console.log("The database is ready!");
-});
+//db.sequelize.sync().then(() => {
+//    console.log("The database is ready!");
+//});
 
 app.use('/assets',express.static('public'))
 
