@@ -41,7 +41,7 @@ router.route('/paymentlink').post(middleware.checkToken,link.createLink)
 
 router.route('/sitweblink').post(middleware.checkToken,link.createWebSitLink)
 
-router.get('/link/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const foundLink = await Lien.findOne({where: {identifiant: req.params.id}})
     
     idLink = foundLink.get('id')
