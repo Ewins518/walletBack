@@ -148,18 +148,30 @@ exports.allReceiveTransaction = async (req, res) => {
 
 exports.allRenversement = async (req, res) => {
     var allData = []
-    
+    var tab = {};
+    var i = 0
     await Compte.findOne({
         where: { userID: req.decoded.userId }
     }).then(async result  => {
 
-        await Momo.findOne({where: {compteID: result.noCompte}})
+        await Momo.findAll({
+            attributes: ["montantRenverser"],
+            where: {compteID: result.noCompte}
+        })
         .then(async data => {
 
-            if(data.montantRenverser == null)
-            return res.status(403).send({Renversement: allData})
+            if(data.length == 0)
+             return res.status(403).send({Renversement: allData})
+             
+ 
+         data.forEach ( async comp => {
+            allData.push(comp.montantRenverser)
+            i++;
 
-               res.status(200).send({Renversement: data.montantRenverser})
+            if(i == data.length)
+            res.status(200).send({Renversement: allData})
+         })
+               
             })
             
              
