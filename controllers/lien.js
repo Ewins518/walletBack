@@ -119,12 +119,19 @@ exports.allLinkUser = async (req, res) => {
         }) 
         .then(async data => {
 
+            if(data.length == 0)
+            return res.status(403).json({allData})
+
             data.forEach(async data01 => {
                 await Client.findAll({
                     attributes: ["name", "createdAt"],
                     where: {lienID: data01.id}
                 })
                 .then(async data02 => {
+
+                    if(data02.length == 0)
+                        return res.status(403).json({allData})
+
                     j++
                     i = 0
                     data02.forEach(async data03 => {

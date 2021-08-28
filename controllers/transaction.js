@@ -77,6 +77,9 @@ exports.allSendTransaction = async (req, res) => {
         where: { userID: req.decoded.userId , isRecharge: false}
     }).then(async result => {
 
+        if(result.length == 0)
+         return res.status(403).send({allData})
+
         result.forEach ( async comp => {
        
         await Compte.findOne({where: {noCompte: comp.compte_id}})
@@ -144,13 +147,18 @@ exports.allReceiveTransaction = async (req, res) => {
 }
 
 exports.allRenversement = async (req, res) => {
+    var allData = []
     
     await Compte.findOne({
         where: { userID: req.decoded.userId }
     }).then(async result  => {
-       
+
         await Momo.findOne({where: {compteID: result.noCompte}})
         .then(async data => {
+
+            if(data.montantRenverser == null)
+            return res.status(403).send({Renversement: allData})
+
                res.status(200).send({Renversement: data.montantRenverser})
             })
             
