@@ -57,7 +57,7 @@ router.route('/recharge').post(middleware.checkToken,recharge.rechargerCompte)
 router.post('/renverser',middleware.checkToken, async (req, res) => {
   
     const getAccount = await Compte.findOne({where: {userID: req.decoded.userId}})
-    const getMomoAccount = await Momo.findOne({where: {noTel: req.body.tel, compteID: getAccount.get('noCompte')}})
+    const getMomoAccount = await Momo.findOne({where: { compteID: getAccount.get('noCompte')}})
     var tab = {};
     var allData = []
     const now = new Date();
@@ -95,7 +95,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
      
       await Momo.update({
         montantTotalRenverser: getMomoAccount.get('montantTotalRenverser') + parseInt(renverse['montant']),
-        montantRenverser: allData,
+        montantRenverser: (getMomoAccount.get('montantRenverser')).push(tab),
       },
        {where: {id: getMomoAccount.get('id')}})
   
