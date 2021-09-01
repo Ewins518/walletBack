@@ -62,7 +62,7 @@ exports.allmomoAccount = async (req, res) => {
     .then(async data => {
 
         await Momo.findAll({
-            attributes: ["noTel", "montantRenverser"],
+            attributes: ["noTel", "montantTotalRenverser"],
             where: { compteID: data.noCompte }
         }).then(async result => {
             
@@ -72,7 +72,7 @@ exports.allmomoAccount = async (req, res) => {
             result.forEach ( async comp => {
            
                     tab["phone"] = comp.noTel,
-                    tab["montant"] = comp.montantRenverser,
+                    tab["montant"] = comp.montantTotalRenverser,
                       
                    i++
                    allData.push(tab)
