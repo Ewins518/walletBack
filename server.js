@@ -25,9 +25,9 @@ const { Collections, Disbursements } = momo.create({
 
 app.set('view engine', 'ejs')
 
-//db.sequelize.sync().then(() => {
-//    console.log("The database is ready!");
-//});
+db.sequelize.sync().then(() => {
+    console.log("The database is ready!");
+});
 
 app.use('/assets',express.static('public'))
 
