@@ -67,7 +67,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     var dat = date.format(now, 'YYYY/MM/DD HH:mm:ss'); 
 
    if(getMomoAccount){
-  
+  console.log("compte trouvé")
     const renverse = {
       noTel: req.body.tel,
       montant: req.body.montant
@@ -94,7 +94,9 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     .then(disbursementId => poll.poll(() => disbursements.getTransaction(disbursementId)))
       .then(async () => {
        
-       getMomoAccount.montantRenverser.push(tab)
+      await getMomoAccount.montantRenverser.push(tab)
+
+        console.log(getMomoAccount.montantRenverser)
 
       await Momo.update({
         montantTotalRenverser: getMomoAccount.montantTotalRenverser + parseInt(renverse['montant']),
