@@ -97,13 +97,13 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
        
         console.log(getMomoAccount.montantRenverser)
 
-     // getMomoAccount.montantRenverser.push(tab)
+     getMomoAccount.montantRenverser.push(tab)
 
         console.log(getMomoAccount.montantRenverser)
 
       await Momo.update({
         montantTotalRenverser: getMomoAccount.montantTotalRenverser + parseInt(renverse['montant']),
-        montantRenverser: Sequelize.fn('array_append', Sequelize.col('montantRenverser'),tab),
+        montantRenverser:  getMomoAccount.montantRenverser
       },
        {where: {id: getMomoAccount.id}})
   
