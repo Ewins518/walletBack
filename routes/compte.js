@@ -57,7 +57,10 @@ router.route('/recharge').post(middleware.checkToken,recharge.rechargerCompte)
 router.post('/renverser',middleware.checkToken, async (req, res) => {
   
     const getAccount = await Compte.findOne({where: {userID: req.decoded.userId}})
-    const getMomoAccount = await Momo.findOne({where: { compteID: getAccount.get('noCompte')}})
+    await Momo.findOne({where: { compteID: getAccount.get('noCompte')}})
+
+    .then(async getMomoAccount => {
+
     var tab = {};
     var allData = []
     const now = new Date();
@@ -69,7 +72,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
       noTel: req.body.tel,
       montant: req.body.montant
     }
-   getMomoAccount.get('montantRenverser') ? allData = getMomoAccount.get('montantRenverser') : allData = []
+  // getMomoAccount.montantRenverser ? allData = getMomoAccount.get('montantRenverser') : allData = []
   
     tab["noTel"] = req.body.tel,
     tab["montant"] = parseInt(req.body.montant),
@@ -94,10 +97,10 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
        allData.push(tab)
      
       await Momo.update({
-        montantTotalRenverser: getMomoAccount.get('montantTotalRenverser') + parseInt(renverse['montant']),
-        montantRenverser: allData,
+        montantTotalRenverser: getMomoAccount.montantTotalRenverser + parseInt(renverse['montant']),
+        montantRenverser: getMomoAccount.montantRenverser.push(tab),
       },
-       {where: {id: getMomoAccount.get('id')}})
+       {where: {id: getMomoAccount.id}})
   
       const oldSolde = getAccount.get('solde');
   
@@ -118,7 +121,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
   }
   
   })
-
+})
 
 router.get("/solde", middleware.checkToken,async (req, res) => {
 
