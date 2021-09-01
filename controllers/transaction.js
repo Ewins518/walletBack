@@ -161,7 +161,7 @@ exports.allRenversement = async (req, res) => {
         .then(async data => {
 
             if(data.length == 0)
-             return res.status(403).send({Renversement: allData})
+             return res.status(403).send({Renversement: convert(allData)})
              
  
          data.forEach ( async comp => {
@@ -178,4 +178,15 @@ exports.allRenversement = async (req, res) => {
         })
 
     
+}
+
+function convert(list) {
+    var i = 0, j = 0;
+    var listFinal = [];
+
+    for(i = 0; i < list.length; i++)
+      for(j = 0; j < list[i].length; j++)
+      listFinal.push(list[i][j]);
+      
+    return listFinal;
 }

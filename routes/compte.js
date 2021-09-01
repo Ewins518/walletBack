@@ -58,7 +58,7 @@ router.route('/recharge').post(middleware.checkToken,recharge.rechargerCompte)
 router.post('/renverser',middleware.checkToken, async (req, res) => {
   
     const getAccount = await Compte.findOne({where: {userID: req.decoded.userId}})
-    await Momo.findOne({where: { compteID: getAccount.get('noCompte')}})
+    await Momo.findOne({where: { noTel: req.body.tel, compteID: getAccount.get('noCompte')}})
 
     .then(async getMomoAccount => {
 
