@@ -13,6 +13,7 @@ require("dotenv").config();
 const poll = require('../controllers/poll')
 const middleware = require('../config/middleware')
 const date = require('date-and-time');
+const { Sequelize } = require('sequelize')
 
 const { Collections, Disbursements } = momo.create({
   callbackHost: "http://aee51d212026.ngrok.io"
@@ -67,7 +68,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     var dat = date.format(now, 'YYYY/MM/DD HH:mm:ss'); 
 
    if(getMomoAccount){
-  console.log("compte trouvé")
+ 
     const renverse = {
       noTel: req.body.tel,
       montant: req.body.montant
@@ -94,13 +95,15 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     .then(disbursementId => poll.poll(() => disbursements.getTransaction(disbursementId)))
       .then(async () => {
        
-      await getMomoAccount.montantRenverser.push(tab)
+        console.log(getMomoAccount.montantRenverser)
+
+      getMomoAccount.montantRenverser.push(tab)
 
         console.log(getMomoAccount.montantRenverser)
 
       await Momo.update({
         montantTotalRenverser: getMomoAccount.montantTotalRenverser + parseInt(renverse['montant']),
-        montantRenverser: getMomoAccount.montantRenverser,
+        montantRenverser: Sequelize.fn('array_append', Sequelize.col('montantRenverser'),tab),
       },
        {where: {id: getMomoAccount.id}})
   
