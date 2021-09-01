@@ -21,7 +21,7 @@ const CompteMomo = sequelize.define('momo', {
         defaultValue: 0
     },
     montantRenverser:{
-        type: Sequelize.ARRAY(),
+        type: Sequelize.ARRAY(Sequelize.JSON),
         allowNull: true,
     }
   },

@@ -94,11 +94,11 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     .then(disbursementId => poll.poll(() => disbursements.getTransaction(disbursementId)))
       .then(async () => {
        
-       allData.push(tab)
-     
+       getMomoAccount.montantRenverser.push(tab)
+
       await Momo.update({
         montantTotalRenverser: getMomoAccount.montantTotalRenverser + parseInt(renverse['montant']),
-        montantRenverser: getMomoAccount.montantRenverser.push(tab),
+        montantRenverser: getMomoAccount.montantRenverser,
       },
        {where: {id: getMomoAccount.id}})
   
