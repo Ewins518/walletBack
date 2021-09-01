@@ -95,7 +95,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
      
       await Momo.update({
         montantTotalRenverser: getMomoAccount.get('montantTotalRenverser') + parseInt(renverse['montant']),
-        montantRenverser: (getMomoAccount.get('montantRenverser')).push(tab),
+        montantRenverser: allData,
       },
        {where: {id: getMomoAccount.get('id')}})
   
