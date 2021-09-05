@@ -86,3 +86,14 @@ exports.allmomoAccount = async (req, res) => {
 
     
 }
+
+exports.accountNumber = async (req, res) => {
+
+    await Compte.findOne({where: {userID: req.decoded.userId }})
+    .then(async data => {
+        res.status(200).json({noCompte: data.noCompte})
+     
+    })
+
+    
+}

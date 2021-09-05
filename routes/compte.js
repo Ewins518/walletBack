@@ -2,6 +2,7 @@ const express = require('express')
 const transaction = require('../controllers/transaction')
 const compte = require('../controllers/compte')
 const recharge = require('../controllers/recharger')
+const rechargeWf = require('../controllers/rechargeWithFeda')
 const router = express.Router()
 const momo = require('mtn-momo');
 const db = require("../models");
@@ -54,6 +55,9 @@ router.route('/getallmomo').get(middleware.checkToken,compte.allmomoAccount)
 
 router.route('/recharge').post(middleware.checkToken,recharge.rechargerCompte)
 
+router.route('/rechargefeda').post(middleware.checkToken,rechargeWf.rechargerWithFeda)
+
+router.route('/number').get(middleware.checkToken,compte.accountNumber)
 
 router.post('/renverser',middleware.checkToken, async (req, res) => {
   
@@ -73,7 +77,6 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
       noTel: req.body.tel,
       montant: req.body.montant
     }
-  // getMomoAccount.montantRenverser ? allData = getMomoAccount.get('montantRenverser') : allData = []
   
     tab["noTel"] = req.body.tel,
     tab["montant"] = parseInt(req.body.montant),
@@ -95,11 +98,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
     .then(disbursementId => poll.poll(() => disbursements.getTransaction(disbursementId)))
       .then(async () => {
        
-        console.log(getMomoAccount.montantRenverser)
-
      getMomoAccount.montantRenverser.push(tab)
-
-        console.log(getMomoAccount.montantRenverser)
 
       await Momo.update({
         montantTotalRenverser: getMomoAccount.montantTotalRenverser + parseInt(renverse['montant']),
@@ -141,6 +140,9 @@ router.get("/montantrecharge",middleware.checkToken, async (req, res) => {
 
     await Transaction.sum('montant',{where: {userID: req.decoded.userId,isRecharge: true}})
     .then(result => {
+      if(result == null)
+      return res.status(200).json({result : 0})
+
       res.status(200).json({result})
     })
     .catch(error => res.status(500).json({ error }))

@@ -11,6 +11,8 @@ var idLink, linkAmount, accountNumber, cb;
 require("dotenv").config();
 const poll = require('../controllers/poll')
 const middleware = require('../config/middleware')
+const { FedaPay, Transaction } = require('fedapay')
+const {parse, stringify} = require('flatted');
 
 const { Collections, Disbursements } = momo.create({
   callbackHost: "https://ultraypay.herokuapp.com/"
@@ -52,32 +54,61 @@ router.get('/:id', async (req, res) => {
      
    })
 
-
-router.post('/pay', async (req, res, next) => {
   
+router.post('/pay', async (req, res, next) => {
+  FedaPay.setApiKey("sk_live_kooD2JD9FNEMycwm51fC4M8E");
+  FedaPay.setEnvironment('live'); 
     const client = {
       name: req.body.nom,
       number: req.body.number,
       lienID: idLink
     }
-    console.log("inside pay")
-    collections
-      .requestToPay({
-        amount: linkAmount,
-        currency: "EUR",
-        externalId: "123456",
-        payer: {
-          partyIdType: momo.PayerType.MSISDN,
-          partyId: client["number"]
-        },
-        payerMessage: "testing",
-        payeeNote: "hello"
-      })
-      .then(async transactionId => poll.poll(() => collections.getTransaction(transactionId)))
-      .then(async () => {
-        console.log("inside pay 2")
-        
-        await Client.create(client)
+    const rechargeFeda = {
+   
+      description: 'Description',
+      amount: linkAmount,
+     // callback_url: 'https://ultrapay.herokuapp.com/',
+      currency: {
+          iso: 'XOF'
+      },
+      customer: {
+          firstname: 'Ewins',
+          lastname: 'Dame',
+          email: 'sbred518@gmail.com',
+          phone_number: {
+              number: req.body.number,
+              country: 'BJ'
+          }
+      }
+    }
+   
+stringify(rechargeFeda)
+  
+  const transaction = await Transaction.create(rechargeFeda)
+  
+  const token = (await transaction.generateToken()).token
+  console.log("token ",token)
+  const mode = 'mtn';
+  await transaction.sendNowWithToken(mode, token)
+  .then(async () => poll.poll(() => Transaction.retrieve(transaction.id)))
+  .then(async () => {
+      console.log("status", transaction.status)
+      const transaction2 = await Transaction.retrieve(transaction.id);
+      console.log(transaction2.status)
+
+      if (transaction2.status == "declined") {
+          console.log("solde insuffisant");
+         return res.status(201).json({ message: "solde insuffisant" })
+      }
+
+      if (transaction2.status == "canceled") {
+          console.log("Vous avez annulé la transaction");
+         return res.status(200).json({ message: "Vous avez annulé la transaction" })
+      }
+      if (transaction2.status == "approved") {
+          console.log("virement effectué");
+
+       await Client.create(client)
         .then(async data => {
   
           const foundCompte = await Compte.findOne({
@@ -97,18 +128,67 @@ router.post('/pay', async (req, res, next) => {
       }
       next(error);
   })
-})
-
-function getFriendlyErrorMessage(error) {
-  if (error instanceof MoMo.NotEnoughFundsError) {
-    return "You have insufficient balance";
-  }
-
-  // Other error messages go here
-
-  return "Something went wrong";
 }
-
 })
+})
+
+//router.post('/pay', async (req, res, next) => {
+//  
+//    const client = {
+//      name: req.body.nom,
+//      number: req.body.number,
+//      lienID: idLink
+//    }
+//    console.log("inside pay")
+//    collections
+//      .requestToPay({
+//        amount: linkAmount,
+//        currency: "EUR",
+//        externalId: "123456",
+//        payer: {
+//          partyIdType: momo.PayerType.MSISDN,
+//          partyId: client["number"]
+//        },
+//        payerMessage: "testing",
+//        payeeNote: "hello"
+//      })
+//      .then(async transactionId => poll.poll(() => collections.getTransaction(transactionId)))
+//      .then(async () => {
+//        console.log("inside pay 2")
+//        
+//        await Client.create(client)
+//        .then(async data => {
+//  
+//          const foundCompte = await Compte.findOne({
+//            where: { noCompte: accountNumber , actif: true}
+//        });
+//
+//      const oldSolde = foundCompte.get('solde');
+//
+//      await Compte.update({solde: oldSolde + linkAmount}, {where: {noCompte: accountNumber}})
+//
+//      cb ?  res.redirect(cb) : res.status(200).json({msg: "Paiement effectué"})
+//    })
+//    .catch(error => {
+//      if (error instanceof momo.MtnMoMoError) {
+//       const err = getFriendlyErrorMessage(error)
+//        res.json({err});
+//      }
+//      next(error);
+//  })
+//})
+//
+//function getFriendlyErrorMessage(error) {
+//  if (error instanceof MoMo.NotEnoughFundsError) {
+//    return "You have insufficient balance";
+//  }
+//
+//  // Other error messages go here
+//
+//  return "Something went wrong";
+//}
+//
+//})
+
 
 module.exports = router

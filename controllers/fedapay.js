@@ -1,5 +1,6 @@
 const { FedaPay, Transaction } = require('fedapay')
 const {parse, stringify} = require('flatted');
+
 exports.fedaTrans = async (req, res) => {
 
 try{
@@ -10,13 +11,13 @@ const recharge = {
    
     description: 'Description',
     amount: 150,
-    callback_url: 'http://localhost:3300/',
+    callback_url: 'https://ultrapay.herokuapp.com',
     currency: {
         iso: 'XOF'
     },
     customer: {
         firstname: 'Ewins',
-        lastname: 'Dame',
+        lastname: 'Roméo',
         email: 'sbred518@gmail.com',
         phone_number: {
             number: '+22962765653',
