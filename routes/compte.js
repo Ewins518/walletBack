@@ -17,7 +17,9 @@ const date = require('date-and-time');
 const { Sequelize } = require('sequelize')
 
 const { Collections, Disbursements } = momo.create({
-  callbackHost: "http://aee51d212026.ngrok.io"
+  callbackHost: "https://ultrapay.herokuapp.com/",
+  environment: "production",
+  baseUrl : "https://ericssondeveloperapi.portal.azure-api.net/"
 });
 
 const collections = Collections({
@@ -89,7 +91,7 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
       currency: "EUR",
       externalId: "12578",
       payee: {
-        partyIdType: "MSISDN",
+        partyIdType: momo.PayerType.MSISDN,
         partyId: renverse["noTel"]
       },
       payerMessage: "testing",
@@ -113,7 +115,17 @@ router.post('/renverser',middleware.checkToken, async (req, res) => {
       res.status(200).json({msg: "Renversement effectué"})
     })
     .catch(error => {
-      res.json(error)
+
+      if (error instanceof momo.MtnMoMoError) {
+          if (error instanceof momo.PayeeNotFoundError) {
+              return res.status(403).json({error: "Le numéro entré n'a pas un compte mobile money"});
+             }
+          if (error instanceof momo.NotEnoughFundsError) {
+             return res.status(403).json({error: "Une erreur interne, réesayer plus tard"});
+            }
+       return res.status(500).json({error: "Something went wrong" });
+      }
+      next(error);
   })
   
     } else {
@@ -148,4 +160,6 @@ router.get("/montantrecharge",middleware.checkToken, async (req, res) => {
     .catch(error => res.status(500).json({ error }))
   })
 
-  module.exports = router
+
+module.exports =  router
+ 

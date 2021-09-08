@@ -6,21 +6,23 @@ require("dotenv").config();
 
 const port = process.env.PORT || 5000
 
-const { Collections, Disbursements } = momo.create({
-    callbackHost: "https://ultraypay.herokuapp.com/"
-  });
-  
-  const collections = Collections({
-    userSecret: process.env.COLLECTIONS_USER_SECRET,
-    userId: process.env.COLLECTIONS_USER_ID,
-    primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
-  });
-  
-  const disbursements = Disbursements({
-    userSecret: process.env.DISBURSEMENTS_USER_SECRET,
-    userId: process.env.DISBURSEMENTS_USER_ID,
-    primaryKey: process.env.DISBURSEMENTS_PRIMARY_KEY
-  });
+//const { Collections, Disbursements } = momo.create({
+//    callbackHost: "https://ultraypay.herokuapp.com/",
+//    environment: "production",
+//    baseUrl: "https://ericssondeveloperapi.portal.azure-api.net/"
+//  });
+//  
+//  const collections = Collections({
+//    userSecret: process.env.COLLECTIONS_USER_SECRET,
+//    userId: process.env.COLLECTIONS_USER_ID,
+//    primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
+//  });
+//  
+//  const disbursements = Disbursements({
+//    userSecret: process.env.DISBURSEMENTS_USER_SECRET,
+//    userId: process.env.DISBURSEMENTS_USER_ID,
+//    primaryKey: process.env.DISBURSEMENTS_PRIMARY_KEY
+//  });
 
 
 app.set('view engine', 'ejs')
@@ -42,4 +44,3 @@ app.use('/compte', compteRoute)
 app.route("/").get((req, res)=> res.json("Bienvenue sur Ultrapay")) 
 
 app.listen(port, () =>console.log(`Server runing on port ${port}` ) ) 
-

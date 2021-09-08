@@ -2,7 +2,8 @@ const db = require("../models");
 const Momo = db.CompteMomo
 const Compte = db.Compte
 const User = db.User
-
+const checkMomo = require('../config/mobileMoney')
+const MoMo = require('mtn-momo');
 exports.addMomo = async (req, res) => {
 
     // Validate request
@@ -21,7 +22,9 @@ exports.addMomo = async (req, res) => {
 
         
     // Save compteMomo in the database and actif compte
-    try{
+    try{    
+
+        if(checkMomo.disbursements.isPayerActive(req.body.tel, MoMo.PayerType.MSISDN)){
            
                 const searchUser = await User.findOne({ where: { id: req.decoded.userId} });
                 
@@ -44,11 +47,13 @@ exports.addMomo = async (req, res) => {
                   //  await Compte.update({ actif: true }, { where: { noCompte: numCompte } });
 
                  }
-                 
+                
                 }
                 else { res.status(404).send("User Not Found"); }
-            }catch (e) {
-                res.status(500).send(e);
+            }
+            else { res.status(403).json({error: "Ce numero n'a pas un compte mobile mobile"}); }
+        }catch (error) {
+                res.status(500).json({error});
             }  
             
 }

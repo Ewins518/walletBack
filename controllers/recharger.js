@@ -4,26 +4,29 @@ const Transaction = db.Transac
 const momo = require('mtn-momo');
 require("dotenv").config();
 const poll = require('./poll')
+const Momo = require('../config/mobileMoney')
 
 exports.rechargerCompte = async (req, res, next) => {
 
-const { Collections, Disbursements } = momo.create ({
-    callbackHost: "https://ultraypay.herokuapp.com/"
-})
-
-const collections = Collections ({
-    userSecret: process.env.COLLECTIONS_USER_SECRET,
-    userId: process.env.COLLECTIONS_USER_ID,
-    primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
-})
-
-
-const disbursements = Disbursements ({
-    userSecret: process.env.DISBURSEMENTS_USER_SECRET,
-    userId: process.env.DISBURSEMENTS_USER_ID,
-    primaryKey: process.env.DISBURSEMENTS_PRIMARY_KEY
-})
-
+//const { Collections, Disbursements } = momo.create ({
+//    callbackHost: "https://ultraypay.herokuapp.com/",
+//    environment: "production",
+//    baseUrl : "https://ericssondeveloperapi.portal.azure-api.net/"
+//})
+//
+//const collections = Collections ({
+//    userSecret: process.env.COLLECTIONS_USER_SECRET,
+//    userId: process.env.COLLECTIONS_USER_ID,
+//    primaryKey: process.env.COLLECTIONS_PRIMARY_KEY
+//})
+//
+//
+//const disbursements = Disbursements ({
+//    userSecret: process.env.DISBURSEMENTS_USER_SECRET,
+//    userId: process.env.DISBURSEMENTS_USER_ID,
+//    primaryKey: process.env.DISBURSEMENTS_PRIMARY_KEY
+//})
+//
     if (!req.body.montant || !req.body.phone) {
         res.status(400).send({
             message: "Content can not be empty!"
@@ -43,19 +46,19 @@ const disbursements = Disbursements ({
 
         if(getCompte){
             console.log("inside collections");
-            collections
+            Momo.collections
                 .requestToPay({
-                  amount: recharge["montant"],
-                  currency: "EUR",
+                  amount: "100",
+                  currency: "XOF",
                   externalId: "123456",
                   payer: {
                     partyIdType: momo.PayerType.MSISDN,
-                    partyId: recharge['phone']
+                    partyId: "22962765653"
                   },
                   payerMessage: "testing",
                   payeeNote: "hello"
                 })
-                .then(async transactionId => poll.poll(() => collections.getTransaction(transactionId)))
+                .then(async transactionId => poll.poll(() => Momo.collections.getTransaction(transactionId)))
                 .then(async () => {
 
                 console.log(res.statusCode)
@@ -90,22 +93,28 @@ const disbursements = Disbursements ({
             .catch(error => {
 
                 if (error instanceof momo.MtnMoMoError) {
-                  res.send(getFriendlyErrorMessage(error));
+                    if (error instanceof momo.PayerNotFoundError) {
+                        return res.status(403).json({error: "Le numéro entré n'a pas un compte mobile money"});
+                       }
+                    if (error instanceof momo.NotEnoughFundsError) {
+                       return res.status(401).json({error: "Solde insuffisant sur votre compte mobile"});
+                      }
+                 return res.status(500).json({error});
                 }
                 next(error);
             })
      }
 
      else 
-        res.status(404).send("Account not found");
+        res.status(404).json({error :"Account not found"});
     }
     
     catch(e) {
-        res.status(500).send(e);
+        res.status(500).json({error: e});
     }  
 
     function getFriendlyErrorMessage(error) {
-        if (error instanceof MoMo.NotEnoughFundsError) {
+        if (error instanceof momo.NotEnoughFundsError) {
           return "You have insufficient balance";
         }
       

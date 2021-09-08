@@ -74,7 +74,7 @@ module.exports = {
                 })
             }
             else{
-                res.status(403).json("Password is incorrect")
+                res.status(403).json({error: "Password is incorrect"})
             }
         })
     }
